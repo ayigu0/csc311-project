@@ -119,6 +119,33 @@ when your working directory is different from the project folder.
 
 ## Shared experiment conventions
 
+### Random Forest baseline
+
+Run from the project root:
+
+```bash
+python models/random_forest.py
+```
+
+This first baseline uses the eight numeric features from `make_features()` and
+the shared student-level split (seed 42, 50%/20%/30%). It retains all rows and
+fits median imputation on training data only, without scaling. Entirely missing
+training columns fall back to zero. This missing-value policy is provisional
+until the team finalizes shared preprocessing.
+
+The default forest has 100 trees, no depth limit, `min_samples_leaf=1`,
+`max_features="sqrt"`, and random seed 42. These settings are not tuned.
+Optional flags include `--n-estimators`, `--max-depth`, `--min-samples-leaf`,
+`--max-features`, `--seed` (forest only), and `--output-root`.
+
+Each run creates a separate `results/random_forest_<UTC timestamp>/` folder
+containing training/validation accuracy and macro-F1, the validation confusion
+matrix, per-class report, validation predictions, and configuration metadata.
+The test set is reserved and not evaluated. This script uses sklearn for
+development; it is not the final restricted-library `pred.py` submission.
+
+### Team conventions
+
 - Use the same original dataset and student-level split for every model.
   The current splitting defaults are seed `42`, validation fraction `0.2`,
   and test fraction `0.3`; the remaining students are used for training.
