@@ -138,7 +138,21 @@ The default forest has 100 trees, no depth limit, `min_samples_leaf=1`,
 Optional flags include `--n-estimators`, `--max-depth`, `--min-samples-leaf`,
 `--max-features`, `--seed` (forest only), and `--output-root`.
 
-Each run creates a separate `results/random_forest_<UTC timestamp>/` folder
+The default split criterion is Gini impurity. To run the entropy version, or
+compare both criteria with all other settings fixed:
+
+```bash
+python models/random_forest.py --criterion entropy
+python models/compare_random_forest.py
+```
+
+The comparison saves `comparison.csv`, paired validation predictions, and a
+separate full run folder for each criterion under
+`results/random_forest_comparison_<UTC timestamp>/`. It verifies matching data,
+preprocessing, splits, and all other model parameters. This is a single-seed
+baseline comparison, not evidence that one criterion consistently wins.
+
+Each baseline run creates a separate `results/random_forest_<criterion>_<UTC timestamp>/` folder
 containing training/validation accuracy and macro-F1, the validation confusion
 matrix, per-class report, validation predictions, and configuration metadata.
 The test set is reserved and not evaluated. This script uses sklearn for

@@ -39,11 +39,12 @@ LABELS = ["Soccer", "Baseball", "Basketball"]
 
 
 def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
-                   max_features="sqrt", seed=42):
+                   max_features="sqrt", seed=42, criterion="gini"):
     """Keep learned imputation inside the model's training pipeline."""
     return Pipeline([
         ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
         ("forest", RandomForestClassifier(
+            criterion=criterion,
             n_estimators=n_estimators,
             max_depth=max_depth,
             min_samples_leaf=min_samples_leaf,
@@ -98,7 +99,9 @@ def run_baseline(output_root=None, **model_options):
     )
 
     output_root = Path(output_root) if output_root is not None else PROJECT_ROOT / "results"
-    run_dir = output_root / datetime.now(timezone.utc).strftime("random_forest_%Y%m%dT%H%M%S_%fZ")
+    criterion = model.named_steps["forest"].criterion
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+    run_dir = output_root / f"random_forest_{criterion}_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=False)
     metrics.to_csv(run_dir / "metrics.csv", index=False)
     matrix.to_csv(run_dir / "validation_confusion_matrix.csv")
@@ -137,6 +140,7 @@ def run_baseline(output_root=None, **model_options):
     (run_dir / "run_config.json").write_text(
         json.dumps(metadata, indent=2) + "\n", encoding="utf-8",
     )
+    print(f"\nRandom Forest criterion: {criterion}")
     print(metrics.to_string(index=False, float_format=lambda value: f"{value:.4f}"))
     print("\nValidation confusion matrix (rows = actual, columns = predicted):")
     print(matrix.to_string())
@@ -147,6 +151,7 @@ def run_baseline(output_root=None, **model_options):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--criterion", choices=["gini", "entropy"], default="gini")
     parser.add_argument("--n-estimators", type=int, default=100)
     parser.add_argument("--max-depth", type=int, default=None)
     parser.add_argument("--min-samples-leaf", type=int, default=1)
