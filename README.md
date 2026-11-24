@@ -11,8 +11,12 @@ Project/
 ├── data_exploration/
 │   └── dataexploration.py
 ├── models/
-│   ├── knn.py
-│   ├── decision_tree.py
+│   ├── naive_bayes.py
+│   ├── random_forest/
+│   │   ├── data_preprocessing.py
+│   │   ├── random_forest.py
+│   │   ├── compare_random_forest.py
+│   │   └── data/
 │   └── softmax_regression.py
 ├── results/
 ├── project_baseline.py
@@ -51,16 +55,15 @@ needs extending to cover the other survey questions.
 
 ### `models/`
 
-One file per model family, so teammates can work on separate experiments:
+Separate model workspaces let teammates work on their own experiments:
 
-- `knn.py`: k-nearest neighbours.
-- `decision_tree.py`: decision tree.
+- `naive_bayes.py`: Naive Bayes placeholder.
+- `random_forest/`: RF preprocessing, training, comparison, and versioned data.
 - `softmax_regression.py`: multiclass logistic regression.
 
-Each file is currently a placeholder. Later, it should contain its model's
-training setup, hyperparameter candidates, and tuning code. Reuse the shared
-data preparation functions rather than keeping separate copies in each file.
-Document model-specific preprocessing, such as feature scaling.
+RF has a runnable development workflow. The other model files remain
+placeholders. Each model should document its preprocessing and keep the
+shared student-level split for comparable evaluation.
 
 ### `results/`
 
@@ -80,8 +83,8 @@ Record the model, feature set, hyperparameters, split settings, validation
 accuracy, and validation macro-F1 alongside each experiment's results. Use
 distinct filenames when comparing runs so teammates' results are preserved.
 
-This folder is initially empty. Git tracks files, so it will appear on GitHub
-once it contains a tracked output or a `.gitkeep` placeholder.
+RF experiment folders preserve the input version, settings, and validation
+results for each run, including the earlier eight-feature baselines.
 
 ## Files in the project root
 
@@ -119,19 +122,49 @@ when your working directory is different from the project folder.
 
 ## Shared experiment conventions
 
-### Random Forest baseline
+### Random Forest preprocessing and training
 
-Run from the project root:
+Generate the versioned dataset, then run from the project root:
 
 ```bash
-python models/random_forest.py
+python models/random_forest/data_preprocessing.py
+python models/random_forest/random_forest.py
 ```
 
-This first baseline uses the eight numeric features from `make_features()` and
-the shared student-level split (seed 42, 50%/20%/30%). It retains all rows and
-fits median imputation on training data only, without scaling. Entirely missing
-training columns fall back to zero. This missing-value policy is provisional
-until the team finalizes shared preprocessing.
+RF now reads `models/random_forest/data/rf_features_v1.csv` by default.
+It contains all 870 rows, the original student split (seed 42, 50%/20%/30%),
+326 numeric features, and four metadata columns: `source_row_index`, `id`,
+`label`, and `split`. Those four columns never enter the model.
+
+`data_preprocessing.py` processes all 12 survey questions:
+
+- Normalize Unicode, whitespace and capitalization; recognize exact unknown
+  markers without removing meaningful phrases or bare `none` in associations.
+- Validate ease scores in 0–10 and map Likert responses to 1–5. Invalid or
+  missing numbers use training medians (zero for all-missing training columns).
+- Multi-hot encode the fixed location, season and music categories, with
+  separate missing-answer and unknown-option indicators.
+- Parse ticket prices as CAD, including currency symbols, thousands separators,
+  `k` suffixes and simple written amounts. A single range uses its midpoint.
+  Explicit unwillingness is zero; ambiguous multiple amounts and foreign
+  currencies become missing. Bare numbers/$ assume CAD. Large valid prices
+  are retained, not clipped.
+- Encode food/drinks, colour, song and feelings as binary word features.
+  Each field uses up to 80 words appearing in at least two training responses.
+  Unknown words in later data are ignored. No scaling is applied.
+- Retain all rows, including empty responses; add missing indicators.
+
+Only training rows determine medians and vocabularies. Frozen rules are saved
+in `models/random_forest/data/rf_preprocessing_v1.json` with source/code/data
+hashes. Loading refuses stale or modified data and asks for regeneration.
+The original CSV and shared exploration code are unchanged. The saved CSV is
+specific to this split: future cross-validation must refit preprocessing inside
+each fold from raw data. This feature set extends the earlier eight-feature
+baseline, so score changes reflect new features as well as cleaning.
+
+For future label-free inputs, load the JSON and call
+`transform_features(raw_dataframe, metadata["state"])` from the preprocessing
+module. It preserves input row order and produces the saved feature columns.
 
 The default forest has 100 trees, no depth limit, `min_samples_leaf=1`,
 `max_features="sqrt"`, and random seed 42. These settings are not tuned.
@@ -142,8 +175,8 @@ The default split criterion is Gini impurity. To run the entropy version, or
 compare both criteria with all other settings fixed:
 
 ```bash
-python models/random_forest.py --criterion entropy
-python models/compare_random_forest.py
+python models/random_forest/random_forest.py --criterion entropy
+python models/random_forest/compare_random_forest.py
 ```
 
 The comparison saves `comparison.csv`, paired validation predictions, and a
@@ -157,6 +190,9 @@ containing training/validation accuracy and macro-F1, the validation confusion
 matrix, per-class report, validation predictions, and configuration metadata.
 The test set is reserved and not evaluated. This script uses sklearn for
 development; it is not the final restricted-library `pred.py` submission.
+
+Check price parsing, row alignment, missing-value handling and frozen training
+rules with `python -m unittest models.random_forest.test_data_preprocessing -v`.
 
 ### Team conventions
 

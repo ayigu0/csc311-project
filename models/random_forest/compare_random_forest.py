@@ -1,6 +1,6 @@
 """Compare Gini and entropy with otherwise identical baseline settings.
 
-Run from the project root: python models/compare_random_forest.py
+Run from the project root: python models/random_forest/compare_random_forest.py
 Only train/validation results are computed; the test split stays reserved.
 """
 
@@ -11,11 +11,11 @@ import sys
 
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from models.random_forest import run_baseline
+from models.random_forest.random_forest import run_baseline
 
 
 def main():

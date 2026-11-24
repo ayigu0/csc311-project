@@ -1,6 +1,6 @@
-"""Random Forest baseline using the shared eight numeric features.
+"""Random Forest using the versioned, preprocessed RF dataset.
 
-Run from the project root: python models/random_forest.py
+Run from the project root: python models/random_forest/random_forest.py
 This is development code, not the restricted-library submission pred.py.
 """
 
@@ -15,34 +15,26 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.pipeline import Pipeline
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from data_exploration.dataexploration import (
-    DATA_FILE,
-    load_dataset,
-    make_features,
-    split_by_student,
+from models.random_forest.data_preprocessing import (
+    FEATURE_FILE,
+    METADATA_FILE,
+    LABELS,
+    load_preprocessed_dataset,
 )
-
-
-SPLIT_SEED = 42
-VAL_FRAC = 0.2
-TEST_FRAC = 0.3
-LABELS = ["Soccer", "Baseball", "Basketball"]
 
 
 def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
                    max_features="sqrt", seed=42, criterion="gini"):
-    """Keep learned imputation inside the model's training pipeline."""
+    """The versioned input already contains training-fitted preprocessing."""
     return Pipeline([
-        ("imputer", SimpleImputer(strategy="median", keep_empty_features=True)),
         ("forest", RandomForestClassifier(
             criterion=criterion,
             n_estimators=n_estimators,
@@ -58,17 +50,14 @@ def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
 def run_baseline(output_root=None, **model_options):
     """Train once, evaluate train/validation, and save an isolated run folder.
 
-    All rows are retained for this first baseline, including empty responses.
-    Missing features use training medians (zero for an entirely missing training
-    column). This is a provisional policy until shared preprocessing is settled.
+    Read frozen features and split assignments from the RF CSV. No preprocessing
+    is refitted here. Test rows remain reserved and are never scored.
     """
-    data = load_dataset()
-    train, val, test = split_by_student(
-        data["id"], val_frac=VAL_FRAC, test_frac=TEST_FRAC, seed=SPLIT_SEED,
-    )
-    # Split raw rows first; do not build features or evaluate on the test set.
-    X_train = make_features(data.loc[train])
-    X_val = make_features(data.loc[val])
+    data, preprocessing = load_preprocessed_dataset()
+    train, val, test = (data["split"].eq(name) for name in ["train", "validation", "test"])
+    feature_columns = preprocessing["state"]["feature_columns"]
+    X_train = data.loc[train, feature_columns]
+    X_val = data.loc[val, feature_columns]
     y_train = data.loc[train, "label"]
     y_val = data.loc[val, "label"]
 
@@ -114,22 +103,16 @@ def run_baseline(output_root=None, **model_options):
 
     metadata = {
         "model": "RandomForestClassifier",
-        "feature_set": "shared_baseline_8_numeric_features",
+        "feature_set": preprocessing["version"],
         "features": X_train.columns.tolist(),
-        "data_file": str(DATA_FILE.relative_to(PROJECT_ROOT)),
-        "data_sha256": hashlib.sha256(DATA_FILE.read_bytes()).hexdigest(),
-        "split": {
-            "seed": SPLIT_SEED, "val_fraction": VAL_FRAC, "test_fraction": TEST_FRAC,
-            "rows": {name: int(mask.sum()) for name, mask in
-                     [("train", train), ("validation", val), ("test_reserved", test)]},
-        },
+        "data_file": str(FEATURE_FILE.relative_to(PROJECT_ROOT)),
+        "data_sha256": hashlib.sha256(FEATURE_FILE.read_bytes()).hexdigest(),
+        "split": preprocessing["split"],
         "preprocessing": {
-            "imputation": "training median; all-missing training columns use zero",
-            "row_policy": "retain all rows, including empty responses",
-            "scaling": "none",
-            "training_imputation_values": dict(zip(
-                X_train.columns, model.named_steps["imputer"].statistics_.tolist(),
-            )),
+            "metadata_file": str(METADATA_FILE.relative_to(PROJECT_ROOT)),
+            "metadata_sha256": hashlib.sha256(METADATA_FILE.read_bytes()).hexdigest(),
+            "policies": preprocessing["policies"],
+            "training_imputation_values": preprocessing["state"]["medians"],
         },
         "hyperparameters": model.named_steps["forest"].get_params(),
         "tuned": False,
