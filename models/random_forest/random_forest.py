@@ -31,7 +31,7 @@ from models.random_forest.data_preprocessing import (
 )
 
 
-def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
+def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1, min_samples_split=2,
                    max_features="sqrt", seed=42, criterion="gini"):
     """The versioned input already contains training-fitted preprocessing."""
     return Pipeline([
@@ -40,6 +40,7 @@ def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
             n_estimators=n_estimators,
             max_depth=max_depth,
             min_samples_leaf=min_samples_leaf,
+            min_samples_split=min_samples_split,
             max_features=max_features,
             random_state=seed,
             n_jobs=-1,
@@ -47,7 +48,7 @@ def build_pipeline(n_estimators=100, max_depth=None, min_samples_leaf=1,
     ])
 
 
-def run_baseline(output_root=None, **model_options):
+def run_baseline(output_root=None, tuning_source=None, **model_options):
     """Train once, evaluate train/validation, and save an isolated run folder.
 
     Read frozen features and split assignments from the RF CSV. No preprocessing
@@ -115,7 +116,8 @@ def run_baseline(output_root=None, **model_options):
             "training_imputation_values": preprocessing["state"]["medians"],
         },
         "hyperparameters": model.named_steps["forest"].get_params(),
-        "tuned": False,
+        "tuned": tuning_source is not None,
+        "tuning_source": tuning_source,
         "test_evaluated": False,
         "versions": {"python": sys.version.split()[0], "numpy": np.__version__,
                      "pandas": pd.__version__, "sklearn": sklearn.__version__},
@@ -132,16 +134,41 @@ def run_baseline(output_root=None, **model_options):
     return model, metrics, run_dir
 
 
+def parse_max_features(value):
+    if value in {"sqrt", "log2"}:
+        return value
+    try:
+        fraction = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Use sqrt, log2, or a fraction in (0, 1].") from exc
+    if not 0 < fraction <= 1:
+        raise argparse.ArgumentTypeError("Feature fraction must be in (0, 1].")
+    return fraction
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--criterion", choices=["gini", "entropy"], default="gini")
-    parser.add_argument("--n-estimators", type=int, default=100)
-    parser.add_argument("--max-depth", type=int, default=None)
-    parser.add_argument("--min-samples-leaf", type=int, default=1)
-    parser.add_argument("--max-features", choices=["sqrt", "log2"], default="sqrt")
-    parser.add_argument("--seed", type=int, default=42, help="Forest seed; split seed stays 42.")
+    parser.add_argument("--config", type=Path, help="Use a saved tuning configuration for this dataset.")
+    parser.add_argument("--criterion", choices=["gini", "entropy"], default=argparse.SUPPRESS)
+    parser.add_argument("--n-estimators", type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--max-depth", type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--min-samples-leaf", type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--min-samples-split", type=int, default=argparse.SUPPRESS)
+    parser.add_argument("--max-features", type=parse_max_features, default=argparse.SUPPRESS)
+    parser.add_argument("--seed", type=int, default=argparse.SUPPRESS, help="Forest seed; split seed stays 42.")
     parser.add_argument("--output-root", type=Path, default=PROJECT_ROOT / "results")
-    run_baseline(**vars(parser.parse_args()))
+    options = vars(parser.parse_args())
+    config_path = options.pop("config")
+    if config_path is not None:
+        if set(options) - {"output_root"}:
+            parser.error("Use --config alone or explicit model flags, not both.")
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        if (config["data_sha256"] != hashlib.sha256(FEATURE_FILE.read_bytes()).hexdigest()
+                or config["preprocessing_metadata_sha256"] != hashlib.sha256(METADATA_FILE.read_bytes()).hexdigest()):
+            parser.error("Tuned configuration belongs to a different dataset/preprocessing version.")
+        options.update(config["model_options"])
+        options["tuning_source"] = str(config_path.resolve())
+    run_baseline(**options)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,159 @@
+{
+  "model_options": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_split": 10,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "seed": 42,
+    "criterion": "gini"
+  },
+  "selected_trial": {
+    "trial_id": 40,
+    "stage": "features_and_trees",
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_split": 10,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "seed": 42,
+    "criterion": "gini",
+    "train_accuracy": 0.9885057471264368,
+    "train_macro_f1": 0.9885203244377617,
+    "validation_accuracy": 0.9425287356321839,
+    "validation_macro_f1": 0.9422194195795353,
+    "mean_tree_nodes": 133.88666666666666,
+    "accuracy_gap": 0.04597701149425293
+  },
+  "feature_set": "rf_preprocessed_v1",
+  "data_sha256": "313e70c0860fbdf48820ab11335958783a3650e94344092da6971bbfa2670498",
+  "preprocessing_metadata_sha256": "bd4db0811263134adaa63f0898ffe158179b5b0878b82c06b00adfdf0b8c9d77",
+  "split": {
+    "seed": 42,
+    "val_fraction": 0.2,
+    "test_fraction": 0.3,
+    "rows": {
+      "train": 435,
+      "validation": 174,
+      "test_reserved": 261
+    }
+  },
+  "test_evaluated": false,
+  "search": {
+    "method": "two-stage holdout search; same structural samples for both criteria",
+    "structural_candidates_per_criterion": [
+      [
+        null,
+        1,
+        2
+      ],
+      [
+        5,
+        5,
+        5
+      ],
+      [
+        5,
+        1,
+        5
+      ],
+      [
+        10,
+        5,
+        10
+      ],
+      [
+        10,
+        5,
+        2
+      ],
+      [
+        null,
+        5,
+        10
+      ],
+      [
+        5,
+        2,
+        5
+      ],
+      [
+        20,
+        2,
+        10
+      ],
+      [
+        5,
+        2,
+        2
+      ],
+      [
+        20,
+        2,
+        2
+      ],
+      [
+        null,
+        1,
+        10
+      ],
+      [
+        null,
+        5,
+        2
+      ],
+      [
+        5,
+        1,
+        10
+      ],
+      [
+        20,
+        1,
+        2
+      ],
+      [
+        10,
+        2,
+        5
+      ],
+      [
+        null,
+        5,
+        5
+      ],
+      [
+        5,
+        1,
+        2
+      ],
+      [
+        20,
+        5,
+        5
+      ]
+    ],
+    "stage_2": {
+      "n_estimators": [
+        100,
+        300
+      ],
+      "max_features": [
+        "sqrt",
+        "log2",
+        0.3
+      ]
+    },
+    "seed": 42,
+    "unique_trials": 46,
+    "selection": "validation macro-F1, then accuracy; ties prefer fewer trees, fewer mean nodes, earlier trial",
+    "limitation": "selection score on one reused validation split; not an unbiased generalization estimate"
+  },
+  "results_directory": "results/random_forest_tuning_20261124T004331_524702Z",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  }
+}

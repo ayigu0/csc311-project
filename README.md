@@ -169,7 +169,8 @@ module. It preserves input row order and produces the saved feature columns.
 The default forest has 100 trees, no depth limit, `min_samples_leaf=1`,
 `max_features="sqrt"`, and random seed 42. These settings are not tuned.
 Optional flags include `--n-estimators`, `--max-depth`, `--min-samples-leaf`,
-`--max-features`, `--seed` (forest only), and `--output-root`.
+`--min-samples-split`, `--max-features` (`sqrt`, `log2`, or a fraction in (0, 1]),
+`--seed` (forest only), and `--output-root`.
 
 The default split criterion is Gini impurity. To run the entropy version, or
 compare both criteria with all other settings fixed:
@@ -193,6 +194,53 @@ development; it is not the final restricted-library `pred.py` submission.
 
 Check price parsing, row alignment, missing-value handling and frozen training
 rules with `python -m unittest models.random_forest.test_data_preprocessing -v`.
+
+To evaluate both fixed baselines on training, validation **and the local test
+set**, run:
+
+```bash
+python models/random_forest/evaluate_random_forest.py
+```
+
+The evaluation checks student separation and saved split sizes, fits only the
+435 training rows, selects a criterion by validation macro-F1 (accuracy breaks
+ties), and then scores both models on the 261 local test rows. The validation
+set has 174 rows. It saves a combined metrics table, per-class reports,
+confusion matrices, predictions, and configuration under
+`results/random_forest_evaluation_<UTC timestamp>/`. This explicitly exposes
+local test performance; use the validation-only comparison for future tuning.
+The local student test set is separate from the course's hidden TA/instructor
+test set.
+
+### RF hyperparameter tuning
+
+```bash
+python models/random_forest/tune_random_forest.py
+python models/random_forest/random_forest.py --config models/random_forest/tuned_params.json
+```
+
+The bounded search uses the saved training/validation split and never evaluates
+test predictions. Stage 1 compares 18 fixed structural configurations for each
+of Gini and entropy, including the original baseline. The candidates are sampled
+with seed 42 from depths `[5, 10, 20, None]`, leaf sizes `[1, 2, 5]`, and split
+minimums `[2, 5, 10]`, using 100 trees and `sqrt` feature sampling. Stage 2 varies
+`max_features` over `sqrt`, `log2`, and `0.3`, and tree count over 100 and 300 for
+each criterion's structural winner. Duplicate configurations are skipped,
+yielding 46 fits in total. Selection maximizes validation macro-F1, then
+accuracy; ties prefer fewer trees, smaller trees, and the earlier trial.
+
+The script saves every trial, its validation predictions, a baseline comparison,
+and the chosen configuration under `results/random_forest_tuning_<timestamp>/`.
+`models/random_forest/tuned_params.json` is the reusable selected configuration;
+loading checks the dataset and preprocessing hashes. `--config` cannot be mixed
+with explicit model flags. Running without `--config` still reproduces the
+original baseline settings.
+
+The current winner uses Gini, 300 trees, unlimited depth, `min_samples_split=10`,
+`min_samples_leaf=1`, and `max_features="log2"`. Validation accuracy is 94.25%
+and macro-F1 is 0.9422, compared with the Gini baseline's 93.10% and 0.9309.
+These are selection scores on the same 174 validation rows, not independent
+generalization estimates. No new test score was computed during tuning.
 
 ### Team conventions
 
