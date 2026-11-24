@@ -1,0 +1,61 @@
+field,sport,response,count,answered,percent
+food_and_drinks,Baseball,hot dog,18,181,9.94
+food_and_drinks,Baseball,hot dogs,9,181,4.97
+food_and_drinks,Baseball,beer,7,181,3.87
+food_and_drinks,Baseball,hot dog and beer,4,181,2.21
+food_and_drinks,Baseball,coke,4,181,2.21
+food_and_drinks,Basketball,popcorn,7,178,3.93
+food_and_drinks,Basketball,gatorade,6,178,3.37
+food_and_drinks,Basketball,coke,4,178,2.25
+food_and_drinks,Basketball,beer,4,178,2.25
+food_and_drinks,Basketball,hot dog,3,178,1.69
+food_and_drinks,Soccer,beer,17,185,9.19
+food_and_drinks,Soccer,"beer, hot dog",3,185,1.62
+food_and_drinks,Soccer,coke,3,185,1.62
+food_and_drinks,Soccer,fried chicken,2,185,1.08
+food_and_drinks,Soccer,"hot dogs, beer",2,185,1.08
+associated_colour,Baseball,blue,79,181,43.65
+associated_colour,Baseball,white,32,181,17.68
+associated_colour,Baseball,brown,13,181,7.18
+associated_colour,Baseball,red,13,181,7.18
+associated_colour,Baseball,green,6,181,3.31
+associated_colour,Basketball,orange,78,183,42.62
+associated_colour,Basketball,red,37,183,20.22
+associated_colour,Basketball,brown,11,183,6.01
+associated_colour,Basketball,orange.,5,183,2.73
+associated_colour,Basketball,black,4,183,2.19
+associated_colour,Soccer,green,73,184,39.67
+associated_colour,Soccer,red,20,184,10.87
+associated_colour,Soccer,blue,19,184,10.33
+associated_colour,Soccer,white,9,184,4.89
+associated_colour,Soccer,yellow,4,184,2.17
+associated_song,Baseball,take me out to the ball game,33,159,20.75
+associated_song,Baseball,ok [a team in this sport],6,159,3.77
+associated_song,Baseball,none,5,159,3.14
+associated_song,Baseball,no particular song,4,159,2.52
+associated_song,Baseball,centerfield,3,159,1.89
+associated_song,Basketball,see you again,5,164,3.05
+associated_song,Basketball,we will rock you,5,164,3.05
+associated_song,Basketball,roundball rock,4,164,2.44
+associated_song,Basketball,none,4,164,2.44
+associated_song,Basketball,no particular song,3,164,1.83
+associated_song,Soccer,waka waka,66,178,37.08
+associated_song,Soccer,we will rock you,3,178,1.69
+associated_song,Soccer,waving flag,3,178,1.69
+associated_song,Soccer,dai dai,2,178,1.12
+associated_song,Soccer,viva la vida,2,178,1.12
+watching_feelings,Baseball,bored,35,182,19.23
+watching_feelings,Baseball,excited,12,182,6.59
+watching_feelings,Baseball,neutral,8,182,4.40
+watching_feelings,Baseball,confused,7,182,3.85
+watching_feelings,Baseball,boring,5,182,2.75
+watching_feelings,Basketball,excited,41,184,22.28
+watching_feelings,Basketball,bored,9,184,4.89
+watching_feelings,Basketball,neutral,6,184,3.26
+watching_feelings,Basketball,exciting,5,184,2.72
+watching_feelings,Basketball,happy,5,184,2.72
+watching_feelings,Soccer,excited,37,185,20.00
+watching_feelings,Soccer,bored,5,185,2.70
+watching_feelings,Soccer,exciting,4,185,2.16
+watching_feelings,Soccer,neutral,3,185,1.62
+watching_feelings,Soccer,none,3,185,1.62

@@ -1,0 +1,4 @@
+label,rows,parsed,median_cad,minimum_cad,maximum_cad,missing_answers,parse_failures,parsed_pct,q1_cad,q3_cad,outliers_global_iqr
+Baseball,185,155,55.0,0.0,3000.0,2,28,83.78,30.0,100.0,3
+Basketball,185,157,150.0,0.0,5000.0,2,26,84.86,80.0,250.0,21
+Soccer,185,145,200.0,0.0,10000.0,1,39,78.38,80.0,400.0,33

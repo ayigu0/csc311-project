@@ -1,0 +1,13 @@
+field,answered_rows,raw_blanks,missing_markers,invalid_answers,missing_pct,distinct_normalized_answers,feature_columns
+beginner_ease,553,2,0,0,0.36,13,2
+strategy_importance,553,2,0,0,0.36,5,2
+injury_risk,553,2,0,0,0.36,5,2
+individual_brilliance,553,2,0,0,0.36,5,2
+ticket_price,457,2,3,93,17.66,146,2
+play_locations,553,2,0,0,0.36,51,8
+play_seasons,553,2,0,0,0.36,13,5
+music_genres,553,2,0,0,0.36,91,11
+food_and_drinks,544,11,0,0,1.98,382,170
+associated_colour,548,7,0,0,1.26,119,66
+associated_song,501,46,8,0,9.73,314,186
+watching_feelings,551,3,1,0,0.72,301,201
