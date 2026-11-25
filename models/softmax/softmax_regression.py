@@ -139,6 +139,7 @@ if __name__ == "__main__":
     model = SoftmaxRegression(learning_rate=0.01, batch_size=32, l2=0.001)
     model.fit(X_train, y_train)
     predictions = model.predict(X_val)
+    print(predictions)
 
     print(f"Epochs run: {model.n_epochs_} ({model.stop_reason_})")
     print(f"Training loss before fitting: {model.loss_history_[0]:.6f}")
