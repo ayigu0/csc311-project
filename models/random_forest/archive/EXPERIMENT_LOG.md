@@ -37,8 +37,8 @@ Missing values used training medians. No scaling was applied.
 The large training/validation gap indicated weak generalization with this
 limited representation. These were untuned baselines, not final models.
 
-Evidence: [original Gini run](../../results/random_forest_20261122T030021_458837Z/metrics.csv)
-and [criterion comparison](../../results/random_forest_comparison_20261122T041912_195651Z/comparison.csv).
+Evidence: [original Gini run](../../../results/random_forest/archive/random_forest_20261122T030021_458837Z/metrics.csv)
+and [criterion comparison](../../../results/random_forest/archive/random_forest_comparison_20261122T041912_195651Z/comparison.csv).
 
 ## 2. RF-specific preprocessing across all questions
 
@@ -55,7 +55,7 @@ prices remained missing, with separate missingness flags.
 The improvement reflects both additional predictors and preprocessing; it
 cannot be attributed to cleaning alone.
 
-Evidence: [expanded-feature comparison](../../results/random_forest_comparison_20261124T002917_142972Z/comparison.csv).
+Evidence: [expanded-feature comparison](../../../results/random_forest/archive/random_forest_comparison_20261124T002917_142972Z/comparison.csv).
 
 ## 3. Historical local test evaluation
 
@@ -72,7 +72,7 @@ These are historical baseline scores. They are not test scores for the later
 tuned model or the new training-size experiment. The local test set was
 exposed at this point and should not be described as never previously seen.
 
-Evidence: [evaluation metrics](../../results/random_forest_evaluation_20261124T003339_457071Z/metrics.csv).
+Evidence: [evaluation metrics](../../../results/random_forest/archive/random_forest_evaluation_20261124T003339_457071Z/metrics.csv).
 
 ## 4. Bounded hyperparameter search
 
@@ -112,9 +112,9 @@ matched-parameter criterion comparisons.
 The Gini validation gain was two additional correct predictions out of 174.
 These are scores used for selection, not independent generalization estimates.
 
-Evidence: [all trials](../../results/random_forest_tuning_20261124T004331_524702Z/trials.csv),
-[baseline versus tuned](../../results/random_forest_tuning_20261124T004331_524702Z/baseline_vs_tuned.csv),
-and [configuration replay](../../results/random_forest_gini_20261124T004402_028162Z/metrics.csv).
+Evidence: [all trials](../../../results/random_forest/archive/random_forest_tuning_20261124T004331_524702Z/trials.csv),
+[baseline versus tuned](../../../results/random_forest/archive/random_forest_tuning_20261124T004331_524702Z/baseline_vs_tuned.csv),
+and [configuration replay](../../../results/random_forest/archive/random_forest_gini_20261124T004402_028162Z/metrics.csv).
 
 ## 5. Main preprocessing versus RF v1
 
@@ -134,7 +134,7 @@ do not by themselves establish better semantic correctness; the parser rules
 differ. RF v1 was retained because it performed better for the RF model under
 matched conditions, not because it is universally better for every model.
 
-Evidence: [preprocessing comparison](../../results/random_forest_5fold_20261125T030257_299777Z/preprocessing_comparison.csv).
+Evidence: [preprocessing comparison](../../../results/random_forest/archive/random_forest_5fold_20261125T030257_299777Z/preprocessing_comparison.csv).
 
 ## 6. Five student-grouped development folds
 
@@ -157,8 +157,8 @@ This small difference does not establish a consistent superiority. Parameters
 and preprocessing had already been selected using part of this data, so the
 results assess stability and are not nested CV or a fresh independent test.
 
-Evidence: [fold metrics](../../results/random_forest_5fold_20261125T030257_299777Z/metrics_by_fold.csv)
-and [summary](../../results/random_forest_5fold_20261125T030257_299777Z/metrics_summary.csv).
+Evidence: [fold metrics](../../../results/random_forest/archive/random_forest_5fold_20261125T030257_299777Z/metrics_by_fold.csv)
+and [summary](../../../results/random_forest/archive/random_forest_5fold_20261125T030257_299777Z/metrics_summary.csv).
 
 ## 7. New training-size experiment
 
@@ -240,16 +240,16 @@ Common-cohort accuracy uses the same 15 held-out students (45 responses) within 
 
 ### Artifacts and verification
 
-- [All 80 trial metrics](../../results/random_forest_training_size_20261125T033851_791399Z/trials.csv)
-- [Summary statistics](../../results/random_forest_training_size_20261125T033851_791399Z/summary.csv)
-- [Student split assignments](../../results/random_forest_training_size_20261125T033851_791399Z/split_assignments.csv.gz)
-- [Training and validation predictions](../../results/random_forest_training_size_20261125T033851_791399Z/predictions.csv.gz)
-- [Frozen experiment configuration](../../results/random_forest_training_size_20261125T033851_791399Z/experiment_config.json)
-- [Hashes of preserved historical artifacts](../../results/random_forest_training_size_20261125T033851_791399Z/prior_artifact_hashes.json)
+- [All 80 trial metrics](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/trials.csv)
+- [Summary statistics](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/summary.csv)
+- [Student split assignments](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/split_assignments.csv.gz)
+- [Training and validation predictions](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/predictions.csv.gz)
+- [Frozen experiment configuration](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/experiment_config.json)
+- [Hashes of preserved historical artifacts](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/prior_artifact_hashes.json)
 
 Verification recomputed all accuracy/F1 values from saved predictions, checked nested and disjoint student splits, confirmed the identical common cohort within each seed, replayed all 40 training-only preprocessing states, and checked summary means/standard deviations. All 80 protected historical artifacts and configuration/data files retained identical hashes.
 
-![Training-size accuracy curves](../../results/random_forest_training_size_20261125T033851_791399Z/training_size_accuracy.png)
+![Training-size accuracy curves](../../../results/random_forest/archive/random_forest_training_size_20261125T033851_791399Z/training_size_accuracy.png)
 
 ## 8. Current selected model on the original test partition
 
@@ -286,10 +286,10 @@ Reproduce with:
 python models/random_forest/evaluate_selected_model.py
 ```
 
-Evidence: [metrics](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/metrics.csv),
-[test confusion matrix](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/test_confusion_matrix.csv),
-[test predictions](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/test_predictions.csv),
-and [evaluation configuration](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/evaluation_config.json).
+Evidence: [metrics](../../../results/random_forest/archive/random_forest_selected_evaluation_20261125T035826_296344Z/metrics.csv),
+[test confusion matrix](../../../results/random_forest/archive/random_forest_selected_evaluation_20261125T035826_296344Z/test_confusion_matrix.csv),
+[test predictions](../../../results/random_forest/archive/random_forest_selected_evaluation_20261125T035826_296344Z/test_predictions.csv),
+and [evaluation configuration](../../../results/random_forest/archive/random_forest_selected_evaluation_20261125T035826_296344Z/evaluation_config.json).
 
 Verification recomputed every split's metrics and confusion matrix from saved
 predictions, confirmed original row membership and exact validation prediction
@@ -322,8 +322,8 @@ valid descriptions of their historical experiments, but must not be mixed with
 this table. This is a matched validation assessment with previously selected
 settings, not nested CV or a fresh independent test estimate.
 
-See [FINAL_PERFORMANCE.md](FINAL_PERFORMANCE.md) for the reporting protocol,
-limitations, and source links, and the [comparison CSV](../../results/model_comparison_shared_folds_20261125T040231_675387Z/model_comparison.csv)
+See [FINAL_PERFORMANCE.md](../FINAL_PERFORMANCE.md) for the reporting protocol,
+limitations, and source links, and the [comparison CSV](../../../results/random_forest/current/shared_cv/model_comparison.csv)
 for exact figures.
 
 ## 10. Selected RF evaluated on the team's shared test partition
@@ -353,7 +353,7 @@ local evaluation, not a fresh blind test. A fair three-model test table requires
 Softmax and Naive Bayes to be trained and tested on these same populations;
 their existing five-fold scores are a separate type of result.
 
-Evidence: [metrics](../../results/random_forest_shared_test_20261125T160757_303151Z/metrics.csv),
-[test predictions](../../results/random_forest_shared_test_20261125T160757_303151Z/test_predictions.csv),
-and [configuration](../../results/random_forest_shared_test_20261125T160757_303151Z/evaluation_config.json).
+Evidence: [metrics](../../../results/random_forest/current/shared_test/metrics.csv),
+[test predictions](../../../results/random_forest/current/shared_test/test_predictions.csv),
+and [configuration](../../../results/random_forest/current/shared_test/evaluation_config.json).
 

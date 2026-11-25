@@ -12,7 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from models.random_forest.data_preprocessing import (
+from models.random_forest.submit.data_preprocessing import (
     ANSWER_COLS, fit_preprocessor, parse_ticket_price, transform_features,
 )
 

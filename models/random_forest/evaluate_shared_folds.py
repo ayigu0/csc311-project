@@ -21,7 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from data_exploration.dataexploration import DATA_FILE, load_dataset, split_by_student
-from models.random_forest.data_preprocessing import sha256
+from models.random_forest.reporting_utils import sha256
 from models.random_forest.submit.random_forest import PARAMETERS_FILE, RandomForestModel
 from models.softmax import evaluate_softmax
 from models.naive_bayes import evaluate_naive_bayes
@@ -57,7 +57,7 @@ def main():
                       for p in (PROJECT_ROOT / "results" / folder).rglob("*") if p.is_file()]
     original_hashes = {str(p.relative_to(PROJECT_ROOT)): sha256(p) for p in teammate_files}
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
-    output = PROJECT_ROOT / "results" / f"model_comparison_shared_folds_{stamp}"
+    output = PROJECT_ROOT / "results/random_forest/runs" / f"shared_cv_{stamp}"
     output.mkdir(parents=True, exist_ok=False)
     assignments = data[["id"]].copy()
     assignments["role"] = np.where(test, "test_reserved", "development")

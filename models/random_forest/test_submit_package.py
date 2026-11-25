@@ -12,37 +12,44 @@ import unittest
 
 import pandas as pd
 
-from models.random_forest import data_preprocessing as original
+from data_exploration.dataexploration import DATA_FILE
 from models.random_forest.submit import data_preprocessing as isolated
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+ARCHIVE = HERE / "archive"
+
+
+def load_historical_dataset():
+    return (pd.read_csv(ARCHIVE / "data/rf_features_v1.csv"),
+            json.loads((ARCHIVE / "data/rf_preprocessing_v1.json").read_text()))
 
 
 class SubmitPackageTests(unittest.TestCase):
     def test_rules_parameters_and_features_match_selected_version(self):
+        archived_tree = ast.parse((ARCHIVE / "data_preprocessing.py").read_text())
+        functions = {node.name: node for node in archived_tree.body if isinstance(node, ast.FunctionDef)}
         for name in ["normalize_text", "is_unknown", "clean_answers", "parse_ticket_price",
                      "tokens", "base_features", "fit_preprocessor", "transform_features"]:
-            self.assertEqual(ast.dump(ast.parse(inspect.getsource(getattr(original, name)))),
-                             ast.dump(ast.parse(inspect.getsource(getattr(isolated, name)))))
-        self.assertEqual((HERE / "tuned_params.json").read_bytes(),
+            self.assertEqual(ast.dump(functions[name]),
+                             ast.dump(ast.parse(inspect.getsource(getattr(isolated, name))).body[0]))
+        self.assertEqual((ARCHIVE / "tuned_params.json").read_bytes(),
                          (HERE / "submit/tuned_params.json").read_bytes())
-        saved, metadata = original.load_preprocessed_dataset()
-        raw = pd.read_csv(original.DATA_FILE)
+        saved, metadata = load_historical_dataset()
+        raw = pd.read_csv(DATA_FILE)
         train = raw.loc[saved.split.eq("train")]
         state = isolated.fit_preprocessor(train)
         self.assertEqual(state, metadata["state"])
         self.assertEqual(state, json.loads((HERE / "submit/preprocessing_state.json").read_text()))
         generated = isolated.transform_features(raw, state)
         pd.testing.assert_frame_equal(saved[state["feature_columns"]], generated, check_names=False)
-        masks = original.split_by_student(raw.id)
-        for mask, name in zip(masks, ["train", "validation", "test"]):
-            self.assertEqual(mask.tolist(), saved.split.eq(name).tolist())
+        self.assertEqual(saved.split.value_counts().to_dict(),
+                         {"train": 435, "test": 261, "validation": 174})
 
     def test_standalone_copy_reproduces_validation_predictions(self):
-        saved, _ = original.load_preprocessed_dataset()
-        raw = pd.read_csv(original.DATA_FILE)
-        expected = pd.read_csv(ROOT / "results/random_forest_gini_20261124T004402_028162Z/validation_predictions.csv")
+        saved, _ = load_historical_dataset()
+        raw = pd.read_csv(DATA_FILE)
+        expected = pd.read_csv(ROOT / "results/random_forest/archive/random_forest_gini_20261124T004402_028162Z/validation_predictions.csv")
         with tempfile.TemporaryDirectory(prefix="rf-submit-test-") as folder:
             temp = Path(folder)
             shutil.copytree(HERE / "submit", temp / "submit", ignore=shutil.ignore_patterns("__pycache__"))

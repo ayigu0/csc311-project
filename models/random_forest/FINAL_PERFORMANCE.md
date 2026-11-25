@@ -79,10 +79,20 @@ This fit includes all five development folds and excludes every test student.
 | Full development training set | 682 / 696 | 97.99% | 0.9799 |
 | Shared local test set | 155 / 174 | 89.08% | 0.8911 |
 
-These are the RF results to use in a **separate shared-test comparison** once
-the other models have also been fitted on all 696 development responses and
-evaluated on these exact 174 test responses. Do not place RF's 89.08% beside
-Softmax/Naive Bayes CV scores under a single test-performance heading.
+These are the RF results to use in a **separate shared-test comparison**.
+The latest merged Softmax evaluation also fits all 696 development responses
+and uses the same shared 174-row holdout:
+
+| Model | Correct / test rows | Test accuracy | Test macro-F1 |
+|---|---:|---:|---:|
+| Random Forest (selected Gini) | 155 / 174 | 89.08% | 0.8911 |
+| Softmax Regression | 159 / 174 | 91.38% | 0.9137 |
+
+Softmax figures come from the teammate's [test metrics](../../results/softmax/test_metrics.csv)
+and [evaluation implementation](../softmax/evaluate_softmax.py), merged from
+`main`; they were not regenerated during this reorganization. Naive Bayes has
+no matching test result in this report. Do not mix these test scores with the
+five-fold validation table above.
 
 The split is shared, but these rows were exposed in historical RF experiments.
 This is a retrospective local-holdout evaluation, not a new independent blind
@@ -92,10 +102,10 @@ test or the course's hidden test score. No settings were adjusted in this run.
 python models/random_forest/evaluate_shared_test.py
 ```
 
-- [Shared-test metrics](../../results/random_forest_shared_test_20261125T160757_303151Z/metrics.csv)
-- [Shared-test predictions](../../results/random_forest_shared_test_20261125T160757_303151Z/test_predictions.csv)
-- [Shared-test confusion matrix](../../results/random_forest_shared_test_20261125T160757_303151Z/test_confusion_matrix.csv)
-- [Shared-test protocol and settings](../../results/random_forest_shared_test_20261125T160757_303151Z/evaluation_config.json)
+- [Shared-test metrics](../../results/random_forest/current/shared_test/metrics.csv)
+- [Shared-test predictions](../../results/random_forest/current/shared_test/test_predictions.csv)
+- [Shared-test confusion matrix](../../results/random_forest/current/shared_test/test_confusion_matrix.csv)
+- [Shared-test protocol and settings](../../results/random_forest/current/shared_test/evaluation_config.json)
 
 ## Reproduction and evidence
 
@@ -108,8 +118,8 @@ RF preprocessing separately in each fold, replays the teammates' evaluation
 functions, and verifies that their existing predictions/metrics are reproduced.
 It writes a new result directory without overwriting historical or teammate files.
 
-- [Three-model comparison CSV](../../results/model_comparison_shared_folds_20261125T040231_675387Z/model_comparison.csv)
-- [All 15 fold metrics](../../results/model_comparison_shared_folds_20261125T040231_675387Z/metrics_by_fold.csv)
-- [Exact shared split assignments](../../results/model_comparison_shared_folds_20261125T040231_675387Z/shared_fold_assignments.csv)
-- [RF out-of-fold predictions](../../results/model_comparison_shared_folds_20261125T040231_675387Z/random_forest_gini_validation_predictions.csv)
-- [Protocol, model settings, and source hashes](../../results/model_comparison_shared_folds_20261125T040231_675387Z/comparison_config.json)
+- [Three-model comparison CSV](../../results/random_forest/current/shared_cv/model_comparison.csv)
+- [All 15 fold metrics](../../results/random_forest/current/shared_cv/metrics_by_fold.csv)
+- [Exact shared split assignments](../../results/random_forest/current/shared_cv/shared_fold_assignments.csv)
+- [RF out-of-fold predictions](../../results/random_forest/current/shared_cv/random_forest_gini_validation_predictions.csv)
+- [Protocol, model settings, and source hashes](../../results/random_forest/current/shared_cv/comparison_config.json)

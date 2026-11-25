@@ -20,7 +20,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from data_exploration.dataexploration import DATA_FILE, load_dataset, split_by_student
-from models.random_forest.data_preprocessing import sha256
+from models.random_forest.reporting_utils import sha256
 from models.random_forest.submit.random_forest import PARAMETERS_FILE, RandomForestModel
 
 CLASSES = ["Baseball", "Basketball", "Soccer"]
@@ -37,7 +37,7 @@ def main():
         raise ValueError("Student overlap between development and test.")
     model = RandomForestModel().fit(raw.loc[training])
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
-    output = PROJECT_ROOT / "results" / f"random_forest_shared_test_{stamp}"
+    output = PROJECT_ROOT / "results/random_forest/runs" / f"shared_test_{stamp}"
     output.mkdir(parents=True, exist_ok=False)
     assignments = raw[["id"]].copy()
     assignments["partition"] = np.where(test, "test", "development_train")
