@@ -242,7 +242,43 @@ and macro-F1 is 0.9422, compared with the Gini baseline's 93.10% and 0.9309.
 These are selection scores on the same 174 validation rows, not independent
 generalization estimates. No new test score was computed during tuning.
 
-### Team conventions
+### RF preprocessing selection and five-fold assessment
+
+```bash
+python models/random_forest/compare_data_and_cross_validate.py
+```
+
+This workflow first compares the RF v1 preprocessing with a pinned copy of
+`main` at commit `1e2acaa9959dee5557dac8182dd8f81d7990e120`, using the same
+435/174 training/validation rows and the frozen tuned Gini settings. Both
+versions use the identical original CSV, preserve row alignment, and produce
+finite numeric features. RF v1 achieves 94.25% accuracy / 0.9422 macro-F1,
+versus 91.95% / 0.9193 for main, so RF v1 remains the active data version.
+Training prices missing or unparsed number 18 for RF v1 and 75 for main;
+main's stricter parser deliberately rejects more prose answers. These counts
+alone do not establish which parser is semantically more accurate.
+
+The script then keeps the existing 261-row / 87-student test holdout and divides
+the other 609 rows / 203 students into five groups with seed 43. This preserves
+our existing holdout instead of adopting main's newer 20% holdout. Each fold
+fits fresh medians and vocabularies on its training students, so feature counts
+can differ between folds. The frozen Gini structural parameters are also run
+with entropy; no hyperparameters are selected using these folds.
+
+Mean validation accuracy (sample standard deviation across folds) is
+92.93% (2.15 percentage points) for Gini and 93.27% (2.49 percentage points)
+for entropy. Mean macro-F1 is 0.9293 and 0.9326 respectively. Results include
+fold assignments, preprocessing states, fold metrics, out-of-fold predictions,
+confusion matrices and source provenance under `results/random_forest_5fold_*`.
+The stored RF feature CSV remains the input for the original holdout workflow;
+cross-validation rebuilds features from raw responses using the same RF rules.
+
+These folds reuse data involved in earlier selection and are not nested CV or
+a fresh independent test estimate. The local holdout was evaluated earlier;
+this run does not evaluate it again. The `main_reference` files are unmodified
+source snapshots for reproducibility, not a merge into the shared team code.
+
+### General experiment conventions
 
 - Use the same original dataset and student-level split for every model.
   The current splitting defaults are seed `42`, validation fraction `0.2`,

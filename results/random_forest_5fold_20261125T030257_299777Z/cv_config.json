@@ -1,0 +1,48 @@
+{
+  "selected_preprocessing": "rf_v1",
+  "main_reference": {
+    "commit": "1e2acaa9959dee5557dac8182dd8f81d7990e120",
+    "source_sha256": {
+      "data_exploration/dataexploration.py": "709234a568ec763c60f240e3eb3ac79913f4aa58f8b4c1bfdd68edfa34ac2e1d",
+      "data_exploration/preprocessing.py": "71bea6aa31fb86644b9bf385326b3fad65a3888dfe1c922ac9fbb4e603e7c2c5"
+    },
+    "raw_csv_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+    "same_raw_csv": true,
+    "note": "Unmodified source snapshot. Do not use its relative DATA_FILE path; the RF adapter loads the project CSV."
+  },
+  "raw_data_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+  "rf_preprocessing_code_sha256": "2d7a8072fafc018a13fb33e6e2be24e84440237992536b624a1e9c62d137d943",
+  "tuned_config_sha256": "feeaa70b69e0fb7764a77b59e4b480114ef0255bb2189a6eb791dc79b8a54ba0",
+  "model_options": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_split": 10,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "seed": 42,
+    "criterion": "gini"
+  },
+  "criteria_evaluated": [
+    "gini",
+    "entropy"
+  ],
+  "primary_criterion_selected_before_cv": "gini",
+  "note_on_entropy": "Same frozen structural parameters as Gini, with only criterion changed; no CV tuning.",
+  "preprocessing_selection": "old 435/174 train/validation split, fixed tuned Gini, validation macro-F1 then accuracy",
+  "fold_seed": 43,
+  "n_folds": 5,
+  "student_grouped": true,
+  "development_rows": 609,
+  "development_students": 203,
+  "reserved_test_rows": 261,
+  "reserved_test_students": 87,
+  "test_evaluated": false,
+  "preprocessing_refit_each_fold": true,
+  "limitation": "Previously selected hyperparameters and preprocessing; reused development data. Not nested CV or a fresh independent test estimate; local test was evaluated earlier, not in this run.",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  }
+}

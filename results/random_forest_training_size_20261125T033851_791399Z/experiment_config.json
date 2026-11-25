@@ -1,0 +1,62 @@
+{
+  "experiment": "repeated student-grouped training-size experiment",
+  "train_fractions_requested": [
+    0.7,
+    0.8,
+    0.9,
+    0.95
+  ],
+  "split_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "students": 290,
+  "rows": 870,
+  "raw_data_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+  "preprocessing": "RF v1 rules, freshly fitted within every training subset",
+  "preprocessing_code_sha256": "2d7a8072fafc018a13fb33e6e2be24e84440237992536b624a1e9c62d137d943",
+  "frozen_tuning_config_sha256": "feeaa70b69e0fb7764a77b59e4b480114ef0255bb2189a6eb791dc79b8a54ba0",
+  "model_options_by_criterion": {
+    "gini": {
+      "n_estimators": 300,
+      "max_depth": null,
+      "min_samples_split": 10,
+      "min_samples_leaf": 1,
+      "max_features": "log2",
+      "seed": 42,
+      "criterion": "gini"
+    },
+    "entropy": {
+      "n_estimators": 300,
+      "max_depth": null,
+      "min_samples_split": 10,
+      "min_samples_leaf": 1,
+      "max_features": "log2",
+      "seed": 42,
+      "criterion": "entropy"
+    }
+  },
+  "hyperparameter_policy": "same structural settings as previous 5-fold experiment; vary only criterion; no new tuning",
+  "original_split_used": false,
+  "independent_test_set": false,
+  "old_test_rows_eligible": true,
+  "previous_artifacts_preserved": true,
+  "group_split_policy": "floor(fraction * student_count) training students; remaining students validation; same permutation across fractions within seed",
+  "common_validation_policy": "last 15 students in each seed's permutation; same evaluation rows across all four training fractions within that seed",
+  "uncertainty": "sample standard deviation across 10 overlapping random splits; not a confidence interval or independent experiments",
+  "interpretation": "full validation composition changes with ratio; use common-cohort results as a size-effect diagnostic; all data were used in prior exploration/selection, so this is exploratory",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  }
+}

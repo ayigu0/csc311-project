@@ -1,0 +1,10 @@
+{
+  "commit": "1e2acaa9959dee5557dac8182dd8f81d7990e120",
+  "source_sha256": {
+    "data_exploration/dataexploration.py": "709234a568ec763c60f240e3eb3ac79913f4aa58f8b4c1bfdd68edfa34ac2e1d",
+    "data_exploration/preprocessing.py": "71bea6aa31fb86644b9bf385326b3fad65a3888dfe1c922ac9fbb4e603e7c2c5"
+  },
+  "raw_csv_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+  "same_raw_csv": true,
+  "note": "Unmodified source snapshot. Do not use its relative DATA_FILE path; the RF adapter loads the project CSV."
+}
