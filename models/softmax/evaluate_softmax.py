@@ -1,5 +1,4 @@
-"""Build a confusion matrix from the selected softmax model's validation folds.
-"""
+"""Report accuracy, macro F1, and the confusion matrix on the validation folds."""
 
 from pathlib import Path
 
@@ -45,10 +44,7 @@ def collect_validation_predictions(data):
         predictions_by_fold.append(pd.DataFrame({
             "fold": fold_number, "actual": y_val, "predicted": predictions,
         }))
-        accuracy = accuracy_score(y_val, predictions)
-        macro_f1 = f1_score(y_val, predictions, labels=CLASS_IDS, average="macro")
-        print(f"Fold {fold_number}: {len(y_val)} rows, {model.n_epochs_} epochs, "
-              f"accuracy {accuracy:.6f}, macro F1 {macro_f1:.6f}")
+        print(f"Fold {fold_number}: {len(y_val)} validation rows, {model.n_epochs_} epochs")
 
     combined = pd.concat(predictions_by_fold).sort_index()
     development_rows = data.index[~test_mask].sort_values()
@@ -57,12 +53,31 @@ def collect_validation_predictions(data):
     return combined
 
 
+def summarize_validation_metrics(predictions):
+    """Compute the two proposal metrics per fold and summarize across folds."""
+    rows = []
+    for fold, responses in predictions.groupby("fold"):
+        actual, predicted = responses["actual"], responses["predicted"]
+        rows.append({
+            "fold": fold,
+            "validation_rows": len(responses),
+            "accuracy": accuracy_score(actual, predicted),
+            "macro_f1": f1_score(actual, predicted, labels=CLASS_IDS, average="macro"),
+        })
+    by_fold = pd.DataFrame(rows).set_index("fold")
+    summary = by_fold[["accuracy", "macro_f1"]].agg(["mean", "std"]).rename_axis("statistic")
+    return by_fold, summary
+
+
 def main():
     print(f"Selected softmax settings: {BEST_SETTINGS}; epoch cap: {MAX_EPOCHS}")
     predictions = collect_validation_predictions(load_dataset())
+    by_fold, summary = summarize_validation_metrics(predictions)
     counts = confusion_matrix(predictions["actual"], predictions["predicted"], labels=CLASS_IDS)
     matrix = pd.DataFrame(counts, index=CLASSES, columns=CLASSES).rename_axis("actual_sport")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    by_fold.to_csv(RESULTS_DIR / "validation_metrics_by_fold.csv")
+    summary.to_csv(RESULTS_DIR / "validation_metrics_summary.csv")
     matrix.to_csv(RESULTS_DIR / "validation_confusion_matrix.csv")
 
     fig, ax = plt.subplots(figsize=(6, 5), layout="constrained")
@@ -72,6 +87,10 @@ def main():
            title=f"Softmax validation confusion matrix\nFive student-grouped folds, {len(predictions)} responses")
     fig.savefig(RESULTS_DIR / "validation_confusion_matrix.png", dpi=240)
     plt.close(fig)
+    print("\nValidation metrics by fold")
+    print(by_fold.round(6).to_string())
+    print("\nMean and standard deviation across the five folds")
+    print(summary.round(6).to_string())
     print("\nCombined validation counts (rows: actual, columns: predicted)")
     print(matrix.to_string())
 
