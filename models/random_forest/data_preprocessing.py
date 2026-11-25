@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from data_exploration.dataexploration import (
+from models.random_forest.survey_schema import (
     DATA_FILE, LIKERT_COLS, LIKERT_MAP, rename_features, split_by_student,
 )
 
@@ -245,8 +245,20 @@ def load_preprocessed_dataset():
     if not FEATURE_FILE.exists() or not METADATA_FILE.exists():
         raise FileNotFoundError("Run python models/random_forest/data_preprocessing.py first.")
     metadata = json.loads(METADATA_FILE.read_text(encoding="utf-8"))
+    current_code_hash = sha256(__file__)
+    compatible = metadata["preprocessing_code_sha256"] == current_code_hash
+    compatibility_file = Path(__file__).with_name("preprocessing_compatibility.json")
+    if not compatible and compatibility_file.exists():
+        # A verified import-only migration keeps historical data/config hashes
+        # intact. Further source edits invalidate this explicit mapping.
+        migration = json.loads(compatibility_file.read_text(encoding="utf-8"))
+        compatible = (
+            migration["current_code_sha256"] == current_code_hash
+            and metadata["preprocessing_code_sha256"] in migration["compatible_recorded_code_sha256"]
+            and migration["survey_schema_sha256"] == sha256(Path(__file__).with_name("survey_schema.py"))
+        )
     if (metadata["version"] != VERSION or metadata["source_sha256"] != sha256(DATA_FILE)
-            or metadata["preprocessing_code_sha256"] != sha256(__file__)
+            or not compatible
             or metadata["feature_file_sha256"] != sha256(FEATURE_FILE)):
         raise ValueError("RF data is stale or modified; rerun data_preprocessing.py.")
     data = pd.read_csv(FEATURE_FILE)

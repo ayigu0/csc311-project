@@ -1,0 +1,8 @@
+{
+  "current_code_sha256": "3ed7ff635b87a08861eb660785ef813a300f5cb2b979396e34c4622839df0e81",
+  "compatible_recorded_code_sha256": [
+    "2d7a8072fafc018a13fb33e6e2be24e84440237992536b624a1e9c62d137d943"
+  ],
+  "survey_schema_sha256": "b8cf6e09dc83532cacf3330e83b68bafd98cdffe0d58977f70238dfa08125d02",
+  "reason": "Move the unchanged RF schema and 50/20/30 split out of the evolving shared exploration module. Feature/state equivalence checked against the frozen dataset; preserve historical data and tuned configuration hashes."
+}

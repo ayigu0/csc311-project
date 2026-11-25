@@ -1,0 +1,17 @@
+{
+  "source_commit": "9f27317c4e29a65a7b3ef3f627cb9b67e5bda248",
+  "selected_configuration": "Gini 300 trees, min_samples_split 10, min_samples_leaf 1, max_features log2, seed 42",
+  "source_preprocessing_sha256": "2d7a8072fafc018a13fb33e6e2be24e84440237992536b624a1e9c62d137d943",
+  "historical_preprocessing_state_rows": 435,
+  "scope": "Isolated selected development sources; no experiment scripts or output tables. Not a final restricted-library pred.py bundle.",
+  "files": {
+    "README.md": "3b79e665b163a513c97eb2985b29a4a489f02894199cba989360737b36e48e7d",
+    "__init__.py": "4eddf95659a5ddf0fae90ff055d93df2e1a17a24f39196a0b3665f28bc6dde39",
+    "data_preprocessing.py": "644dcc136a3b34fdb66dfa5b388c163e66509f5dc25c14e2333dbcbd59e2c950",
+    "preprocessing_state.json": "1cfadd8d9fbd167be26d1a7bd544b5be984064b5d4481197d7233549b2128788",
+    "random_forest.py": "adc2950ee8e3d9983610263899935f075482db0d5a5aefc8a1968932d072089e",
+    "requirements.txt": "600b55b6d7e70587263ecf7d186501135f80c49fac4e8a963cba8b189cfbd319",
+    "survey_schema.py": "cfbff0ac753efd2efc898f62e20c15dd37bde69e6c08c427ab772fb55996400d",
+    "tuned_params.json": "feeaa70b69e0fb7764a77b59e4b480114ef0255bb2189a6eb791dc79b8a54ba0"
+  }
+}
