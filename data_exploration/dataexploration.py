@@ -19,8 +19,8 @@ LIKERT_MAP = {
 
 
 def load_dataset():
-    """Load the project dataset and return a pandas DataFrame."""
-    return pd.read_csv(DATA_FILE)
+    """Load raw survey answers so the cleaner can interpret missing markers."""
+    return pd.read_csv(DATA_FILE, keep_default_na=False)
 
 
 def rename_features(df):
