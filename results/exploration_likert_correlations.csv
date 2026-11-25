@@ -1,0 +1,4 @@
+,strategy_importance,injury_risk,individual_brilliance
+strategy_importance,1.0,0.329,-0.22
+injury_risk,0.329,1.0,-0.106
+individual_brilliance,-0.22,-0.106,1.0

@@ -1,6 +1,4 @@
 from pathlib import Path
-import matplotlib.pyplot as plt
-
 import numpy as np
 import pandas as pd
 
@@ -21,8 +19,8 @@ LIKERT_MAP = {
 
 
 def load_dataset():
-    """Load the project dataset and return a pandas DataFrame."""
-    return pd.read_csv(DATA_FILE)
+    """Load raw survey answers so the cleaner can interpret missing markers."""
+    return pd.read_csv(DATA_FILE, keep_default_na=False)
 
 
 def rename_features(df):
@@ -86,32 +84,44 @@ def make_features(df):
     return features
 
 
-def split_by_student(ids, val_frac=0.2, test_frac=0.3, seed=42):
-    """Return train/validation/test masks, keeping each student's rows together.
+def split_by_student(ids, test_frac=0.2, n_folds=5, seed=42, fold_seed=43):
+    """Return a test mask and (train, validation) masks for each development fold.
 
-    Adapted from project_baseline.py. Call this on the full ID column before
-    exploration or dropping any rows. Defaults are 50%/20%/30% of students,
-    subject to rounding. Sorting IDs makes a fixed seed independent of row
-    order. Teammates must use the same dataset, seed, and fractions.
+    All masks align with the original rows. Shuffle sorted student IDs so
+    membership is reproducible even if the survey rows are reordered.
     """
-    if not (0 < val_frac < 1 and 0 < test_frac < 1 and val_frac + test_frac < 1):
-        raise ValueError("Split fractions must be positive and leave a training set.")
+    if not 0 < test_frac < 1:
+        raise ValueError("The test fraction must be between zero and one.")
+    if n_folds < 2:
+        raise ValueError("At least two development folds are required.")
     if ids.isna().any() or ids.astype("string").str.strip().eq("").any():
         raise ValueError("Every row must have a student ID before splitting.")
 
-    rng = np.random.default_rng(seed)
-    students = rng.permutation(sorted(ids.unique()))
+    students = np.random.default_rng(seed).permutation(sorted(ids.unique()))
     n_test = int(len(students) * test_frac)
-    n_val = int(len(students) * val_frac)
-    if n_test == 0 or n_val == 0 or n_test + n_val >= len(students):
-        raise ValueError("There are too few students for three nonempty splits.")
+    if n_test == 0 or len(students) - n_test < n_folds:
+        raise ValueError("Too few students for a nonempty test set and development folds.")
 
-    test_ids = students[:n_test]
-    val_ids = students[n_test:n_test + n_val]
-    train_ids = students[n_test + n_val:]
-    return ids.isin(train_ids), ids.isin(val_ids), ids.isin(test_ids)
+    test = ids.isin(students[:n_test])
+    development_students = np.random.default_rng(fold_seed).permutation(students[n_test:])
+    folds = []
+    for validation_students in np.array_split(development_students, n_folds):
+        validation = ids.isin(validation_students)
+        train = ~test & ~validation
+        folds.append((train, validation))
+    return test, folds
 
 
 if __name__ == "__main__":
-    df = load_dataset()
-    df = rename_features(df)
+    data = rename_features(load_dataset())
+    test, folds = split_by_student(data["id"])
+    development = data.loc[~test]
+    print(f"Development: {development['id'].nunique()} students, {len(development)} responses")
+    print(f"Test: {data.loc[test, 'id'].nunique()} students, {test.sum()} responses")
+    for number, (train, validation) in enumerate(folds, start=1):
+        print(
+            f"Fold {number}: "
+            f"train {data.loc[train, 'id'].nunique()} students / {train.sum()} responses, "
+            f"validation {data.loc[validation, 'id'].nunique()} students / "
+            f"{validation.sum()} responses"
+        )

@@ -1,0 +1,64 @@
+field,option,sport,selected,answered,percent
+play_locations,at home or nearby,Baseball,24,184,13.04
+play_locations,at home or nearby,Basketball,120,184,65.22
+play_locations,at home or nearby,Soccer,83,185,44.86
+play_locations,community recreation facility,Baseball,90,184,48.91
+play_locations,community recreation facility,Basketball,161,184,87.50
+play_locations,community recreation facility,Soccer,139,185,75.14
+play_locations,indoor facility,Baseball,44,184,23.91
+play_locations,indoor facility,Basketball,177,184,96.20
+play_locations,indoor facility,Soccer,116,185,62.70
+play_locations,others,Baseball,8,184,4.35
+play_locations,others,Basketball,22,184,11.96
+play_locations,others,Soccer,31,185,16.76
+play_locations,outdoor public space,Baseball,162,184,88.04
+play_locations,outdoor public space,Basketball,166,184,90.22
+play_locations,outdoor public space,Soccer,175,185,94.59
+play_locations,private sports facility,Baseball,102,184,55.43
+play_locations,private sports facility,Basketball,151,184,82.07
+play_locations,private sports facility,Soccer,128,185,69.19
+play_locations,school or university facility,Baseball,139,184,75.54
+play_locations,school or university facility,Basketball,174,184,94.57
+play_locations,school or university facility,Soccer,162,185,87.57
+play_seasons,fall,Baseball,129,184,70.11
+play_seasons,fall,Basketball,161,184,87.50
+play_seasons,fall,Soccer,125,185,67.57
+play_seasons,spring,Baseball,138,184,75.00
+play_seasons,spring,Basketball,156,184,84.78
+play_seasons,spring,Soccer,131,185,70.81
+play_seasons,summer,Baseball,169,184,91.85
+play_seasons,summer,Basketball,170,184,92.39
+play_seasons,summer,Soccer,167,185,90.27
+play_seasons,winter,Baseball,11,184,5.98
+play_seasons,winter,Basketball,106,184,57.61
+play_seasons,winter,Soccer,14,185,7.57
+music_genres,classical or jazz,Baseball,10,184,5.43
+music_genres,classical or jazz,Basketball,3,184,1.63
+music_genres,classical or jazz,Soccer,1,185,0.54
+music_genres,country,Baseball,55,184,29.89
+music_genres,country,Basketball,4,184,2.17
+music_genres,country,Soccer,9,185,4.86
+music_genres,electronic or dance,Baseball,27,184,14.67
+music_genres,electronic or dance,Basketball,34,184,18.48
+music_genres,electronic or dance,Soccer,67,185,36.22
+music_genres,folk or traditional,Baseball,18,184,9.78
+music_genres,folk or traditional,Basketball,2,184,1.09
+music_genres,folk or traditional,Soccer,7,185,3.78
+music_genres,hip-hop or rap,Baseball,48,184,26.09
+music_genres,hip-hop or rap,Basketball,154,184,83.70
+music_genres,hip-hop or rap,Soccer,81,185,43.78
+music_genres,latin,Baseball,9,184,4.89
+music_genres,latin,Basketball,1,184,0.54
+music_genres,latin,Soccer,77,185,41.62
+music_genres,no particular type,Baseball,57,184,30.98
+music_genres,no particular type,Basketball,17,184,9.24
+music_genres,no particular type,Soccer,33,185,17.84
+music_genres,other,Baseball,5,184,2.72
+music_genres,other,Basketball,8,184,4.35
+music_genres,other,Soccer,5,185,2.70
+music_genres,pop,Baseball,67,184,36.41
+music_genres,pop,Basketball,92,184,50.00
+music_genres,pop,Soccer,73,185,39.46
+music_genres,rock,Baseball,41,184,22.28
+music_genres,rock,Basketball,45,184,24.46
+music_genres,rock,Soccer,42,185,22.70

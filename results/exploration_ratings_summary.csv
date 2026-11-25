@@ -1,0 +1,6 @@
+,beginner_ease,beginner_ease,beginner_ease,strategy_importance,strategy_importance,strategy_importance,injury_risk,injury_risk,injury_risk,individual_brilliance,individual_brilliance,individual_brilliance
+,count,median,mean,count,median,mean,count,median,mean,count,median,mean
+label,,,,,,,,,,,,
+Baseball,184,4.0,4.01,184,4.0,3.55,184,3.0,2.88,184,4.0,3.67
+Basketball,184,6.0,5.98,184,4.0,3.93,184,4.0,3.82,184,4.0,3.57
+Soccer,185,7.0,6.21,185,4.0,3.99,185,4.0,3.83,185,3.0,2.87

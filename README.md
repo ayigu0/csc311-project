@@ -9,15 +9,14 @@ Project/
 ├── data/
 │   └── csc311_project_training_202609.csv
 ├── data_exploration/
-│   └── dataexploration.py
+│   ├── dataexploration.py
+│   ├── preprocessing.py
+│   └── report.py
 ├── models/
-│   ├── naive_bayes.py
+│   ├── naive_bayes/
 │   ├── random_forest/
-│   │   ├── data_preprocessing.py
-│   │   ├── random_forest.py
-│   │   ├── compare_random_forest.py
-│   │   └── data/
-│   └── softmax_regression.py
+│   │   └── submit/
+│   └── softmax/
 ├── results/
 ├── project_baseline.py
 ├── pred_example.py
@@ -46,24 +45,70 @@ The current `dataexploration.py` provides:
 - `rename_features(df)`: replace long questions with short column names.
 - `make_features(df)`: convert the baseline's subset of ease, Likert, and
   season answers into numeric features, retaining missing values.
-- `split_by_student(ids, ...)`: return training, validation, and test masks
-  while keeping each student's responses together.
+- `split_by_student(ids, ...)`: return the held-out test mask and five
+  (training, validation) mask pairs for grouped development folds.
 
-Running the file currently only loads the CSV and renames its columns. The
-other functions are available to call when needed. The feature builder still
-needs extending to cover the other survey questions.
+Running the file prints student and response counts for the holdout and each
+fold. Use `SurveyPreprocessor` in `data_exploration/preprocessing.py` for the
+full set of 12 questions. The original `make_features` helper covers the
+baseline questions.
+
+Generate the exploration tables and plots from the first training fold:
+
+```bash
+python -m data_exploration.report
+```
+
+The outputs include class counts, raw blanks and recognized missing markers,
+invalid ratings and price parse failures, rating distributions and Spearman
+correlations, ticket-price summaries, multi-select rates and their heatmap,
+and frequent normalized text answers by sport.
+
+### Shared survey preprocessing
+
+```python
+from data_exploration.dataexploration import load_dataset, split_by_student
+from data_exploration.preprocessing import SurveyPreprocessor
+
+data = load_dataset()
+test, folds = split_by_student(data["id"])
+train, validation = folds[0]
+preprocessor = SurveyPreprocessor().fit(data.loc[train])
+X_train = preprocessor.transform(data.loc[train], model="softmax")
+X_validation = preprocessor.transform(data.loc[validation], model="softmax")
+y_train = data.loc[train, "label"]
+```
+
+Fit a new instance in each fold. For final evaluation, fit on the full
+development set and transform the held-out test set. The same fitted instance
+can transform new survey responses, including partially filled responses.
+Student IDs and labels are excluded. Response rows, including entirely blank
+ones, are retained and missing answers are flagged.
+
+- Ratings are validated against their scales. Ease and price use training
+  medians, and agreement levels use training modes. If an entire numeric
+  field is unavailable in training, the fallback is zero for ease and price
+  and neutral for agreement levels.
+- Missing markers are matched against the whole normalized answer. Explicit
+  no-association answers are retained in free-text fields. Ticket-price parsing
+  accepts clear CAD amounts, range midpoints, common written numbers, and
+  explicit zero-payment answers. Unclear answers and foreign currencies are
+  unavailable. Unmarked amounts are assumed to be CAD.
+- Multi-select choices become binary columns. Text vocabularies are learned
+  separately for each field using a minimum training frequency of two responses
+  and a maximum of 200 terms per field. Unseen choices and words add no columns.
+- Use `model="random_forest"` for unscaled ratings and binary text,
+  `model="softmax"` for standardized numeric values and TF-IDF text, or
+  `model="naive_bayes"` for unscaled ratings and binary text. The Naive Bayes
+  trainer can use `LIKERT_COLS` for categorical likelihoods, ease and price
+  for Gaussian likelihoods, and the indicator columns for Bernoulli likelihoods.
 
 ### `models/`
 
-Separate model workspaces let teammates work on their own experiments:
-
-- `naive_bayes.py`: Naive Bayes placeholder.
-- `random_forest/`: RF preprocessing, training, comparison, and versioned data.
-- `softmax_regression.py`: multiclass logistic regression.
-
-RF has a runnable development workflow. The other model files remain
-placeholders. Each model should document its preprocessing and keep the
-shared student-level split for comparable evaluation.
+The Softmax and Naive Bayes folders contain their training, tuning and
+evaluation workflows using the shared preprocessing interface. The Random
+Forest folder contains its selected preprocessing, model, and experiment history.
+Its isolated selected source package is in [models/random_forest/submit](models/random_forest/submit/README.md).
 
 ### `results/`
 
@@ -83,8 +128,7 @@ Record the model, feature set, hyperparameters, split settings, validation
 accuracy, and validation macro-F1 alongside each experiment's results. Use
 distinct filenames when comparing runs so teammates' results are preserved.
 
-RF experiment folders preserve the input version, settings, and validation
-results for each run, including the earlier eight-feature baselines.
+The exploration outputs can be regenerated with the command above.
 
 ## Files in the project root
 
@@ -114,13 +158,52 @@ python data_exploration/dataexploration.py
 ```
 
 In PyCharm, open `data_exploration/dataexploration.py` and use **Run File in
-Python Console** to keep `df` available for interactive commands, such as
-`df.columns`.
+Python Console** to keep `data` available for interactive commands, such as
+`data.columns`.
 
 CSV paths are resolved relative to the Python files, so loading also works
 when your working directory is different from the project folder.
 
 ## Shared experiment conventions
+
+- Use the same original dataset and shared student-level split for every model.
+  Hold out 20% of students with seed `42` and split the remaining students into
+  five development folds with seed `43`.
+- Create the split before exploration or dropping rows. For exploration, use
+  the first fold's training mask (`folds[0][0]`). Keep student IDs out of the
+  model's predictors.
+- Fit imputation values, scaling statistics, and text vocabularies within each
+  training fold.
+- Compare models on the same five validation folds using accuracy and macro-F1.
+  Reserve the held-out test set for final evaluation.
+- The supplied baseline uses its original split as a standalone course example.
+- Work on task branches and have another teammate review changes before
+  merging. Include the experiment settings with any results you share.
+
+## Selected RF package and preserved experiments
+
+`models/random_forest/submit/` contains the selected model source, RF v1 cleaning
+code, frozen survey schema, selected hyperparameters and historical preprocessing
+state. Its imports do not depend on the parent experiments or shared exploration
+code. See the [package README](models/random_forest/submit/README.md) for usage
+and the remaining distinction from the course's final restricted-library pred.py.
+
+Experiments and tests remain in `models/random_forest/`; generated results remain
+in `results/`. The [English experiment log](models/random_forest/EXPERIMENT_LOG.md)
+records all prior comparisons and the training-size experiment.
+
+RF historical runs retain their 50/20/30 split through a frozen RF-specific
+`survey_schema.py`; shared Softmax/Naive Bayes code retains main's newer 20%
+holdout and development-fold API. These historical scores use different
+partitions and must not be treated as a matched three-model comparison. The
+explicit `preprocessing_compatibility.json` mapping allows the verified schema
+import migration while preserving original RF data, parameter and result hashes.
+
+Verify the integration and isolated package with:
+
+```bash
+python -m unittest models.random_forest.test_data_preprocessing models.random_forest.test_submit_package -v
+```
 
 ### Random Forest preprocessing and training
 
@@ -277,22 +360,3 @@ These folds reuse data involved in earlier selection and are not nested CV or
 a fresh independent test estimate. The local holdout was evaluated earlier;
 this run does not evaluate it again. The `main_reference` files are unmodified
 source snapshots for reproducibility, not a merge into the shared team code.
-
-### General experiment conventions
-
-- Use the same original dataset and student-level split for every model.
-  The current splitting defaults are seed `42`, validation fraction `0.2`,
-  and test fraction `0.3`; the remaining students are used for training.
-  These defaults take effect when `split_by_student()` is called.
-- Split before exploration or dropping rows. Use the training split for
-  exploration, and keep student IDs out of the model's predictors.
-- Learn preprocessing values, including imputation values, scaling statistics,
-  and text vocabularies, from the training data only. During cross-validation,
-  learn them separately within each training fold.
-- Tune every model family using validation data and compare accuracy and
-  macro-F1 on the same validation split. Reserve the local test set for final
-  evaluation after model and preprocessing choices are fixed.
-- The supplied baseline evaluates the test set each time it runs. Use the
-  team's validation workflow for ongoing model selection.
-- Work on task branches and have another teammate review changes before
-  merging. Include the experiment settings with any results you share.
