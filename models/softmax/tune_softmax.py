@@ -1,6 +1,4 @@
 """Tune softmax with text on the five shared student folds.
-
-Run from the project root: python -m models.softmax.tune_softmax
 """
 
 from itertools import product
@@ -36,8 +34,6 @@ def tune_softmax(data):
             model.fit(train_features, y_train)
             print("Stop reason:", model.stop_reason_)
             print("Loss at last epoch:", model.loss_history_[-1])
-            print("Best loss:", model.loss_history_[model.best_epoch_])
-            print("Loss 20 epochs earlier:", model.loss_history_[-21])
             predictions = model.predict(val_features)
             rows.append({
                 "fold": fold_number,
