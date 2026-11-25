@@ -182,6 +182,21 @@ when your working directory is different from the project folder.
 
 ## Selected RF package and preserved experiments
 
+For the final **cross-model performance comparison**, use
+[FINAL_PERFORMANCE.md](models/random_forest/FINAL_PERFORMANCE.md) and run:
+
+```bash
+python models/random_forest/evaluate_shared_folds.py
+```
+
+This reporting workflow uses the exact same 20% student holdout and five
+development folds as Softmax and Naive Bayes (696 development responses).
+It verifies row/fold equality for all three models, refits preprocessing in each
+training fold, and reports mean validation accuracy/macro-F1 with standard
+deviations. Historical RF 609-row CV and 261-row test scores below use different
+partitions and should not be placed in the same comparison table. The shared
+174-row holdout is not evaluated by this reporting command.
+
 `models/random_forest/submit/` contains the selected model source, RF v1 cleaning
 code, frozen survey schema, selected hyperparameters and historical preprocessing
 state. Its imports do not depend on the parent experiments or shared exploration

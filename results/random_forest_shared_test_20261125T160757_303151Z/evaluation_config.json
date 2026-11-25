@@ -1,0 +1,36 @@
+{
+  "protocol": "same shared 20% student holdout as Softmax and Naive Bayes; fit all remaining development rows",
+  "split_function": "data_exploration.dataexploration.split_by_student",
+  "split_source_sha256": "709234a568ec763c60f240e3eb3ac79913f4aa58f8b4c1bfdd68edfa34ac2e1d",
+  "test_fraction": 0.2,
+  "split_seed": 42,
+  "training_rows": 696,
+  "test_rows": 174,
+  "training_students": 232,
+  "test_students": 58,
+  "training_population": "full development set, including all five CV folds",
+  "model_options": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_split": 10,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "seed": 42,
+    "criterion": "gini"
+  },
+  "parameters_sha256": "feeaa70b69e0fb7764a77b59e4b480114ef0255bb2189a6eb791dc79b8a54ba0",
+  "package_manifest_sha256": "c32764fba5c946bd6083fda3d87b3236aa76160e6aae2f7e8266301991672057",
+  "raw_data_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+  "preprocessing_fit_rows": 696,
+  "feature_count": 337,
+  "new_tuning": false,
+  "test_evaluated": true,
+  "test_previously_exposed": true,
+  "limitation": "Shared local test membership was exposed in historical RF test/training-size experiments. This run excludes it from fitting, but it is not a new untouched test or the hidden course test set.",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  }
+}

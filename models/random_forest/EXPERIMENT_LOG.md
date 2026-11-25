@@ -251,3 +251,109 @@ Verification recomputed all accuracy/F1 values from saved predictions, checked n
 
 ![Training-size accuracy curves](../../results/random_forest_training_size_20261125T033851_791399Z/training_size_accuracy.png)
 
+## 8. Current selected model on the original test partition
+
+After isolating the selected sources in `submit/`, the current Gini model was
+evaluated on the original 50/20/30 partitions. This run uses the actual
+`submit.random_forest.RandomForestModel` with the unchanged selected settings:
+300 trees, unlimited depth, minimum split size 10, minimum leaf size 1,
+`max_features="log2"`, forest seed 42. No parameters were tuned in this run.
+
+The model and preprocessing were fitted from scratch on the original 435
+training rows only. The validation rows were not added to training. The fitted
+preprocessing state and all validation predictions exactly reproduce the
+previous selected model.
+
+| Partition | Rows | Students | Correct | Accuracy | Macro-F1 |
+|---|---:|---:|---:|---:|---:|
+| Training | 435 | 145 | 430 | 98.85% | 0.9885 |
+| Validation | 174 | 58 | 164 | 94.25% | 0.9422 |
+| Original local test | 261 | 87 | 231 | 88.51% | 0.8852 |
+
+The selected model gets one more local test response correct than the earlier
+untuned Gini baseline (230/261, 88.12%). The larger validation improvement did
+not translate into a comparable test improvement.
+
+This is a **retrospective evaluation of the original local test partition**.
+That partition was already scored in experiment 3 and its rows were eligible
+for training/validation in experiment 7. Therefore, this score is not a fresh
+untouched-test estimate, even though this particular fit excluded all of those
+test students. It is also not the course's hidden TA/instructor test score.
+
+Reproduce with:
+
+```bash
+python models/random_forest/evaluate_selected_model.py
+```
+
+Evidence: [metrics](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/metrics.csv),
+[test confusion matrix](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/test_confusion_matrix.csv),
+[test predictions](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/test_predictions.csv),
+and [evaluation configuration](../../results/random_forest_selected_evaluation_20261125T035826_296344Z/evaluation_config.json).
+
+Verification recomputed every split's metrics and confusion matrix from saved
+predictions, confirmed original row membership and exact validation prediction
+replay, and checked that all files in the isolated selected package were unchanged.
+
+## 9. Aligning RF with the team's final reporting folds
+
+An audit found that historical RF evaluations reserved 30% of students and used
+609 development rows, whereas Softmax and Naive Bayes both called the shared
+split function with a 20% holdout and 696 development rows. Equal fold counts
+or random seeds alone did not make those evaluations comparable.
+
+RF now has a dedicated reporting entry point, `evaluate_shared_folds.py`, which
+calls the exact same shared splitting function as both teammates. It evaluates
+the unchanged selected Gini model through `submit/`, fitting fresh RF v1
+preprocessing within each training fold. Softmax and Naive Bayes were replayed
+without changing their code, settings or saved outputs. Their prior metrics
+and predictions were reproduced, and every model's row/fold membership was
+verified to match exactly.
+
+| Model | Mean CV accuracy | Accuracy SD | Mean CV macro-F1 | Macro-F1 SD |
+|---|---:|---:|---:|---:|
+| Random Forest (Gini) | 92.10% | 1.39 percentage points | 0.9209 | 0.0140 |
+| Softmax Regression | 92.10% | 0.81 percentage points | 0.9210 | 0.0082 |
+| Naive Bayes | 92.82% | 0.51 percentage points | 0.9283 | 0.0053 |
+
+Use this matched 696-row development CV table for cross-model reporting.
+The 174-row shared holdout was not evaluated in this run. Prior RF scores remain
+valid descriptions of their historical experiments, but must not be mixed with
+this table. This is a matched validation assessment with previously selected
+settings, not nested CV or a fresh independent test estimate.
+
+See [FINAL_PERFORMANCE.md](FINAL_PERFORMANCE.md) for the reporting protocol,
+limitations, and source links, and the [comparison CSV](../../results/model_comparison_shared_folds_20261125T040231_675387Z/model_comparison.csv)
+for exact figures.
+
+## 10. Selected RF evaluated on the team's shared test partition
+
+`evaluate_shared_test.py` fits the selected Gini model on the full 80%
+development set (696 responses / 232 students) and evaluates the exact 20%
+test partition (174 responses / 58 students) defined by the shared split
+function with seed 42. Numeric imputation and vocabularies are refitted on
+development rows only. The selected parameters and isolated `submit/` package
+remain unchanged; no model selection occurs during this run.
+
+| Partition | Correct / total | Accuracy | Macro-F1 |
+|---|---:|---:|---:|
+| Development training | 682 / 696 | 97.99% | 0.9799 |
+| Shared test | 155 / 174 | 89.08% | 0.8911 |
+
+The exact test membership was checked against experiment 9's shared assignments,
+and the training membership equals the union of its five validation folds.
+All saved metrics were independently recomputed from predictions. The learned
+preprocessing state was verified against fitting exclusively on the 696
+development rows, and the isolated package hashes remained unchanged.
+
+The new 89.08% is not directly comparable to experiment 8's 88.51%: both the
+training population and test population changed. The shared test rows were
+previously exposed in historical RF experiments, so this remains retrospective
+local evaluation, not a fresh blind test. A fair three-model test table requires
+Softmax and Naive Bayes to be trained and tested on these same populations;
+their existing five-fold scores are a separate type of result.
+
+Evidence: [metrics](../../results/random_forest_shared_test_20261125T160757_303151Z/metrics.csv),
+[test predictions](../../results/random_forest_shared_test_20261125T160757_303151Z/test_predictions.csv),
+and [configuration](../../results/random_forest_shared_test_20261125T160757_303151Z/evaluation_config.json).
+

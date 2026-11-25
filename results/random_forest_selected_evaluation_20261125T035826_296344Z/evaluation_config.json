@@ -1,0 +1,42 @@
+{
+  "model_source": "models/random_forest/submit/random_forest.py",
+  "package_manifest_sha256": "c32764fba5c946bd6083fda3d87b3236aa76160e6aae2f7e8266301991672057",
+  "parameters_file": "models/random_forest/submit/tuned_params.json",
+  "parameters_sha256": "feeaa70b69e0fb7764a77b59e4b480114ef0255bb2189a6eb791dc79b8a54ba0",
+  "model_options": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_split": 10,
+    "min_samples_leaf": 1,
+    "max_features": "log2",
+    "seed": 42,
+    "criterion": "gini"
+  },
+  "raw_data_sha256": "367f5d8c9fcafc6e56c52764163aa4ce90493dc2a4ba1032ada5c9b6126e7646",
+  "split": {
+    "seed": 42,
+    "val_fraction": 0.2,
+    "test_fraction": 0.3,
+    "rows": {
+      "train": 435,
+      "validation": 174,
+      "test_reserved": 261
+    }
+  },
+  "training_splits": [
+    "train"
+  ],
+  "training_rows": 435,
+  "preprocessing_fitted_on": "original training rows only; matches frozen historical state",
+  "tuned_in_this_run": false,
+  "selected_before_test": true,
+  "test_evaluated": true,
+  "local_test_previously_exposed": true,
+  "interpretation": "Original local test partition reused for retrospective reporting. Earlier baseline evaluation and all-data training-size experiments exposed these rows. Not a new untouched test or the hidden course test set.",
+  "versions": {
+    "python": "3.13.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "sklearn": "1.6.1"
+  }
+}
