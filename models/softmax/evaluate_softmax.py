@@ -1,4 +1,4 @@
-"""Report accuracy, macro F1, and the confusion matrix on the validation folds."""
+"""Report softmax performance on the validation folds and local test set."""
 
 from pathlib import Path
 
@@ -9,8 +9,11 @@ import pandas as pd
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix, f1_score
 
 from data_exploration.dataexploration import load_dataset, split_by_student
+from data_exploration.preprocessing import SurveyPreprocessor
 from models.softmax.compare_softmax_features import with_text_columns
-from models.softmax.softmax_regression import CLASSES, MAX_EPOCHS, SoftmaxRegression, prepare_fold
+from models.softmax.softmax_regression import (
+    CLASSES, MAX_EPOCHS, SoftmaxRegression, _encode_labels, prepare_fold,
+)
 
 
 BEST_SETTINGS = {"learning_rate": 0.1, "batch_size": 32, "l2": 0.0001, "seed": 42}
@@ -69,30 +72,81 @@ def summarize_validation_metrics(predictions):
     return by_fold, summary
 
 
-def main():
-    print(f"Selected softmax settings: {BEST_SETTINGS}; epoch cap: {MAX_EPOCHS}")
-    predictions = collect_validation_predictions(load_dataset())
-    by_fold, summary = summarize_validation_metrics(predictions)
-    counts = confusion_matrix(predictions["actual"], predictions["predicted"], labels=CLASS_IDS)
+def evaluate_heldout_test(data):
+    """Refit on the development set and return test metrics and confusion counts."""
+    test_mask, _ = split_by_student(data["id"])
+    development = data.loc[~test_mask]
+    test = data.loc[test_mask]
+
+    preprocessor = SurveyPreprocessor().fit(development)
+    X_development = preprocessor.transform(development, model="softmax")
+    columns = with_text_columns(X_development.columns)
+    y_development = _encode_labels(development["label"])
+    model = SoftmaxRegression(**BEST_SETTINGS).fit(X_development.loc[:, columns], y_development)
+
+    X_test = preprocessor.transform(test, model="softmax")
+    predictions = model.predict(X_test.loc[:, columns])
+    y_test = _encode_labels(test["label"])
+    metrics = {
+        "development_rows": len(development),
+        "test_rows": len(test),
+        "correct": int((y_test.to_numpy() == predictions).sum()),
+        "accuracy": accuracy_score(y_test, predictions),
+        "macro_f1": f1_score(y_test, predictions, labels=CLASS_IDS, average="macro"),
+    }
+    return metrics, confusion_matrix(y_test, predictions, labels=CLASS_IDS)
+
+
+def save_confusion_matrix(counts, filename, title):
+    """Save a labeled count table and a plot of the same matrix."""
+    output = RESULTS_DIR / filename
     matrix = pd.DataFrame(counts, index=CLASSES, columns=CLASSES).rename_axis("actual_sport")
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    by_fold.to_csv(RESULTS_DIR / "validation_metrics_by_fold.csv")
-    summary.to_csv(RESULTS_DIR / "validation_metrics_summary.csv")
-    matrix.to_csv(RESULTS_DIR / "validation_confusion_matrix.csv")
+    matrix.to_csv(output.with_suffix(".csv"))
 
     fig, ax = plt.subplots(figsize=(6, 5), layout="constrained")
     display = ConfusionMatrixDisplay(confusion_matrix=counts, display_labels=CLASSES)
     display.plot(ax=ax, cmap="Blues", colorbar=False, values_format="d")
-    ax.set(xlabel="Predicted sport", ylabel="Actual sport",
-           title=f"Softmax validation confusion matrix\nFive student-grouped folds, {len(predictions)} responses")
-    fig.savefig(RESULTS_DIR / "validation_confusion_matrix.png", dpi=240)
+    ax.set(xlabel="Predicted sport", ylabel="Actual sport", title=title)
+    fig.savefig(output.with_suffix(".png"), dpi=240)
     plt.close(fig)
+    return matrix
+
+
+def main():
+    print(f"Selected softmax settings: {BEST_SETTINGS}; epoch cap: {MAX_EPOCHS}")
+    data = load_dataset()
+    predictions = collect_validation_predictions(data)
+    by_fold, summary = summarize_validation_metrics(predictions)
+    counts = confusion_matrix(predictions["actual"], predictions["predicted"], labels=CLASS_IDS)
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    by_fold.to_csv(RESULTS_DIR / "validation_metrics_by_fold.csv")
+    summary.to_csv(RESULTS_DIR / "validation_metrics_summary.csv")
+    matrix = save_confusion_matrix(
+        counts, "validation_confusion_matrix",
+        f"Softmax validation confusion matrix\nFive student-grouped folds, {len(predictions)} responses",
+    )
     print("\nValidation metrics by fold")
     print(by_fold.round(6).to_string())
     print("\nMean and standard deviation across the five folds")
     print(summary.round(6).to_string())
     print("\nCombined validation counts (rows: actual, columns: predicted)")
     print(matrix.to_string())
+
+    test_metrics, test_counts = evaluate_heldout_test(data)
+    test_output = RESULTS_DIR / "test_metrics.csv"
+    pd.DataFrame([test_metrics]).to_csv(test_output, index=False)
+    test_matrix = save_confusion_matrix(
+        test_counts, "test_confusion_matrix",
+        f"Softmax test confusion matrix\n20% student holdout, {test_metrics['test_rows']} responses",
+    )
+    print("\nLocal held-out test results")
+    print(f"Refit on {test_metrics['development_rows']} development responses.")
+    print(f"Accuracy: {test_metrics['accuracy']:.2%} "
+          f"({test_metrics['correct']}/{test_metrics['test_rows']} correct)")
+    print(f"Macro F1: {test_metrics['macro_f1']:.4f}")
+    print(f"Saved test metrics to {test_output}")
+    print("\nTest counts (rows: actual, columns: predicted)")
+    print(test_matrix.to_string())
 
 
 if __name__ == "__main__":
